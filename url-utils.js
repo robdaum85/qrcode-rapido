@@ -40,6 +40,18 @@
       throw new Error("O endereço precisa ter um domínio válido.");
     }
 
+    const hostname = parsedUrl.hostname;
+    const isLocalhost = hostname.toLowerCase() === "localhost";
+    const isLiteralIpv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+    const isLiteralIpv6 = hostname.startsWith("[") || hostname.includes(":");
+    const hasPlausibleTld = /\.[a-z]{2,}$/i.test(hostname);
+
+    if (!isLocalhost && !isLiteralIpv4 && !isLiteralIpv6 && !hasPlausibleTld) {
+      throw new Error(
+        "Esse endereço não parece um domínio válido. Ex.: exemplo.com."
+      );
+    }
+
     return parsedUrl.href;
   }
 

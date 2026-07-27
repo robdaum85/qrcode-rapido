@@ -54,8 +54,8 @@ Em 26 de julho de 2026, a base local está preparada contendo:
 A suíte automatizada foi executada com o seguinte resultado:
 
 ```text
-24 testes executados
-24 testes aprovados
+30 testes executados
+30 testes aprovados
 0 falhas
 ```
 
@@ -199,6 +199,8 @@ Comportamentos implementados:
 - rejeita texto que não se parece com endereço;
 - rejeita protocolos como FTP;
 - rejeita hostnames estruturalmente inválidos.
+- exige TLD plausível em domínios públicos;
+- preserva suporte a localhost, IPv4 e IPv6.
 
 O módulo funciona tanto no navegador quanto nos testes executados pelo Node.js.
 

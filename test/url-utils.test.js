@@ -57,3 +57,39 @@ test("rejeita uma URL estruturalmente inválida", () => {
     /domínio válido/
   );
 });
+
+test("rejeita hostname sem TLD", () => {
+  assert.throws(
+    () => normalizeUrl("https://exemplo"),
+    /não parece um domínio válido/
+  );
+});
+
+test("rejeita hostname de uma letra só, sem ponto", () => {
+  assert.throws(
+    () => normalizeUrl("https://a"),
+    /não parece um domínio válido/
+  );
+});
+
+test("aceita localhost sem porta", () => {
+  assert.equal(normalizeUrl("localhost/teste"), "https://localhost/teste");
+});
+
+test("aceita localhost com porta", () => {
+  assert.equal(
+    normalizeUrl("http://localhost:8080/teste"),
+    "http://localhost:8080/teste"
+  );
+});
+
+test("aceita IPv4 literal", () => {
+  assert.equal(
+    normalizeUrl("http://192.168.0.1:3000/painel"),
+    "http://192.168.0.1:3000/painel"
+  );
+});
+
+test("aceita IPv6 literal", () => {
+  assert.equal(normalizeUrl("http://[::1]:3000/"), "http://[::1]:3000/");
+});
