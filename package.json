@@ -1,0 +1,14 @@
+{
+  "name": "qrcode-rapido",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gerador de QR Code estático executado inteiramente no navegador.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/prepare-deploy.js",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.11.1"
+  }
+}

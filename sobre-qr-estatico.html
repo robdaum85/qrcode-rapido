@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="description"
+    content="Entenda a diferença entre QR Code estático e dinâmico, suas dependências e quando usar cada formato."
+  >
+  <meta name="theme-color" content="#132a4f">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="QR Code Rápido">
+  <meta property="og:title" content="QR Code estático ou dinâmico?">
+  <meta
+    property="og:description"
+    content="Entenda onde o destino fica armazenado e por que um QR Code pode parar de funcionar."
+  >
+  <meta property="og:url" content="https://qrcoderapido.netlify.app/sobre-qr-estatico">
+  <meta property="og:image" content="https://qrcoderapido.netlify.app/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="QR Code Rápido — seu link em um QR Code que não expira">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="QR Code estático ou dinâmico?">
+  <meta
+    name="twitter:description"
+    content="Entenda onde o destino fica armazenado e quando usar cada formato."
+  >
+  <meta name="twitter:image" content="https://qrcoderapido.netlify.app/assets/og-image.png">
+  <link rel="canonical" href="https://qrcoderapido.netlify.app/sobre-qr-estatico">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <title>QR Code estático ou dinâmico? — QR Code Rápido</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="content-page">
+  <header class="site-header">
+    <a class="brand-link" href="/" aria-label="Voltar para o gerador QR Code Rápido">
+      QR Code Rápido
+    </a>
+    <a class="header-link" href="/">Gerar um QR Code</a>
+  </header>
+
+  <main class="content-main">
+    <article class="content-card">
+      <p class="eyebrow">Guia rápido</p>
+      <h1>QR Code estático ou dinâmico?</h1>
+      <p class="content-lead">
+        Os dois formatos parecem iguais quando estão impressos. A diferença
+        está no caminho que existe entre a câmera e o destino final.
+      </p>
+
+      <section aria-labelledby="estatico-title">
+        <h2 id="estatico-title">O que é um QR Code estático?</h2>
+        <p>
+          No QR Code estático, o endereço final fica gravado no próprio
+          desenho. Quando a câmera lê o código, ela encontra diretamente o link
+          que você informou.
+        </p>
+        <p>
+          Depois de impresso, esse destino não pode ser alterado. Em
+          compensação, o código não precisa consultar o servidor de uma
+          plataforma de QR Code para descobrir para onde levar a pessoa.
+        </p>
+      </section>
+
+      <section aria-labelledby="dinamico-title">
+        <h2 id="dinamico-title">O que é um QR Code dinâmico?</h2>
+        <p>
+          No QR Code dinâmico, o desenho normalmente guarda um endereço curto
+          controlado por uma plataforma. Esse endereço recebe a leitura e
+          redireciona a pessoa para o destino verdadeiro.
+        </p>
+        <p>
+          Isso permite trocar o destino e medir leituras sem reimprimir o
+          material. Também cria uma dependência permanente: se o redirecionador
+          for desativado, o QR Code impresso pode parar de levar ao destino.
+        </p>
+      </section>
+
+      <section aria-labelledby="comparacao-title">
+        <h2 id="comparacao-title">Comparação direta</h2>
+        <div class="comparison-table-wrapper">
+          <table>
+            <caption class="sr-only">
+              Comparação entre QR Code estático e QR Code dinâmico
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Aspecto</th>
+                <th scope="col">QR estático</th>
+                <th scope="col">QR dinâmico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Onde mora o destino</th>
+                <td>No próprio código</td>
+                <td>Num redirecionador</td>
+              </tr>
+              <tr>
+                <th scope="row">Depois de impresso</th>
+                <td>O destino fica fixo</td>
+                <td>O destino pode ser trocado</td>
+              </tr>
+              <tr>
+                <th scope="row">Se o serviço de QR sair do ar</th>
+                <td>Continua contendo o mesmo endereço</td>
+                <td>O redirecionamento pode parar</td>
+              </tr>
+              <tr>
+                <th scope="row">Estatísticas de leitura</th>
+                <td>Não</td>
+                <td>Geralmente sim</td>
+              </tr>
+              <tr>
+                <th scope="row">Dependência permanente</th>
+                <td>Nenhuma do gerador</td>
+                <td>Do redirecionador</td>
+              </tr>
+              <tr>
+                <th scope="row">Custo ou cadastro</th>
+                <td>Não neste site</td>
+                <td>Frequentemente</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="quando-title">
+        <h2 id="quando-title">Quando cada formato faz sentido?</h2>
+        <p>
+          Use um QR Code estático quando o endereço já é definitivo e você
+          prefere independência, simplicidade e ausência de rastreamento.
+        </p>
+        <p>
+          Um QR Code dinâmico pode fazer sentido quando a troca futura do
+          destino ou as estatísticas são requisitos reais. Nesse caso, é
+          importante saber quem controla o redirecionador, quanto ele custa e o
+          que acontece se o serviço ou a conta forem encerrados.
+        </p>
+      </section>
+
+      <aside class="content-callout" aria-labelledby="escolha-title">
+        <h2 id="escolha-title">Por que este projeto escolheu o estático?</h2>
+        <p>
+          O QR Code Rápido nasceu depois que um código já divulgado deixou de
+          funcionar porque o serviço intermediário exigiu pagamento. Por isso,
+          o gerador grava o destino diretamente no código e não cria uma
+          dependência escondida.
+        </p>
+      </aside>
+
+      <a class="content-cta" href="/">Gerar meu QR Code estático</a>
+    </article>
+  </main>
+
+  <footer>
+    <nav class="footer-links" aria-label="Informações do site">
+      <a href="/">Gerador</a>
+      <a href="/privacidade">Privacidade</a>
+    </nav>
+    <p class="trademark">
+      QR Code é marca registrada da DENSO WAVE INCORPORATED.
+    </p>
+  </footer>
+</body>
+</html>
