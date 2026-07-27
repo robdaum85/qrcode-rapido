@@ -22,10 +22,14 @@ test("mantém zona silenciosa de quatro módulos", () => {
 test("oferece PNG em alta resolução e SVG", () => {
   const script = read("scripts.js");
 
-  assert.match(script, /createPngBlob\(1024\)/);
+  assert.match(script, /createPngBlob\(2048\)/);
   assert.match(script, /type:\s*"svg"/);
-  assert.match(script, /qr-code-estatico-1024px\.png/);
+  assert.match(script, /qr-code-estatico-2048px\.png/);
   assert.match(script, /qr-code-estatico\.svg/);
+});
+
+test("usa correção de erro Q, adequada para impressão", () => {
+  assert.match(read("scripts.js"), /errorCorrectionLevel:\s*"Q"/);
 });
 
 test("a biblioteca local gera um SVG válido", async () => {
@@ -112,6 +116,14 @@ test("carrega a cópia progressiva sem código remoto", () => {
   assert.match(html, /src="clipboard-utils\.js"/);
   assert.match(html, /id="copy-image-button"/);
   assert.match(html, /aria-label="Copiar QR Code como imagem PNG"/);
+});
+
+test("publica cabeçalhos de segurança restritivos via netlify.toml", () => {
+  const netlify = read("netlify.toml");
+
+  assert.match(netlify, /Content-Security-Policy = "[^"]*default-src 'self'/);
+  assert.match(netlify, /X-Content-Type-Options = "nosniff"/);
+  assert.match(netlify, /Referrer-Policy = "no-referrer"/);
 });
 
 test("configura pipeline com testes e publicação isolada em dist", () => {

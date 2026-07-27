@@ -49,13 +49,18 @@ Em 26 de julho de 2026, a base local está preparada contendo:
 - política e canal de reporte de segurança;
 - botão progressivo para copiar o QR Code como imagem;
 - verificação automática da integridade da biblioteca;
-- guia e templates para contribuições.
+- guia e templates para contribuições;
+- correção de erro `Q`, calibrada para impressão e divulgação;
+- PNG de download em 2048 × 2048 pixels;
+- cabeçalhos de segurança restritivos via `netlify.toml`;
+- validação de hostname com exigência de TLD plausível;
+- suíte de testes de comportamento real da interface (`scripts.js`).
 
 A suíte automatizada foi executada com o seguinte resultado:
 
 ```text
-30 testes executados
-30 testes aprovados
+43 testes executados
+43 testes aprovados
 0 falhas
 ```
 
@@ -133,6 +138,7 @@ qrcoderapido/
 ├── test/
 │   ├── project.test.js
 │   ├── scripts.test.js
+│   ├── scripts-behavior.test.js
 │   ├── vendor.test.js
 │   └── url-utils.test.js
 ├── vendor/
@@ -217,6 +223,14 @@ Controla o comportamento da interface:
 - criação dos downloads;
 - liberação dos objetos temporários de download.
 
+A lógica fica isolada em `createApp(document, window, deps)`, que recebe o
+`document`, o `window` e as dependências externas (`normalizeUrl`, `QRCode`,
+`ClipboardUtilities`) como parâmetros. No navegador, `autoInit()` chama
+`createApp` com os objetos globais reais. Nos testes, `createApp` recebe um
+`document`/`window` de `happy-dom` e mocks das dependências, permitindo
+exercitar o fluxo completo (submit, estados, canvas, downloads) sem abrir um
+navegador de verdade.
+
 ### `clipboard-utils.js`
 
 Isola a detecção e o uso da Clipboard API:
@@ -230,7 +244,7 @@ Isola a detecção e o uso da Clipboard API:
 - sugere o download em PNG como fallback.
 
 A imagem copiada possui 512 pixels, resolução suficiente para colagem em
-documentos e conversas sem o custo da exportação de 1024 pixels.
+documentos e conversas sem o custo da exportação de 2048 pixels.
 
 ### Páginas públicas
 
@@ -296,15 +310,25 @@ Exemplos:
 |---|---|
 | `exemplo.com/pagina` | `https://exemplo.com/pagina` |
 | `https://exemplo.com` | mantida como HTTPS |
-| `http://localhost:3000` | aceita |
+| `http://localhost:3000` | aceita (exceção de desenvolvimento) |
+| `http://192.168.0.1:3000` | aceita (IP literal) |
+| `http://[::1]:3000` | aceita (IP literal) |
 | campo vazio | rejeitado |
 | `apenas um texto` | rejeitado |
 | `ftp://exemplo.com` | rejeitado |
 | `https://.` | rejeitado |
+| `https://a` | rejeitado (sem TLD) |
+| `https://exemplo` | rejeitado (sem TLD) |
 
 A validação determina se o endereço é estruturalmente aceitável. Ela não envia
 requisições ao destino para verificar se a página existe, evitando vazamento de
 informações e dependência de rede adicional.
+
+Hostnames públicos precisam terminar em um TLD plausível (um ponto seguido de
+duas ou mais letras). Essa checagem é puramente estrutural — não existe lista
+de TLDs válidos, o que evitaria manutenção contínua e dependência de dado
+externo. `localhost` e IPs literais (IPv4 e IPv6) são exceções explícitas,
+pois não seguem esse formato mas são destinos legítimos.
 
 ## Configuração do QR Code
 
@@ -313,7 +337,7 @@ As opções principais são compartilhadas entre o preview e os arquivos:
 ```js
 {
   margin: 4,
-  errorCorrectionLevel: "M",
+  errorCorrectionLevel: "Q",
   color: {
     dark: "#10233f",
     light: "#ffffff"
@@ -328,11 +352,21 @@ silenciosa, ajuda os leitores a separar o QR Code do material ao redor.
 
 ### Correção de erro
 
-O nível `M` foi definido explicitamente para equilibrar:
+O nível `Q` (~25% de tolerância a dano) é o padrão, calibrado para o caso de
+uso real do projeto: QR Code impresso e divulgado, sujeito a dobra, sujeira,
+impressão de baixa qualidade e leitura em ângulo.
 
-- capacidade de dados;
-- densidade visual;
-- tolerância a pequenos danos.
+| Nível | Tolerância a dano | Densidade | Adequação ao caso |
+|---|---|---|---|
+| L | ~7%  | menor | pouca margem para dano físico |
+| M | ~15% | média | uso em tela, ambiente controlado |
+| **Q** | **~25%** | maior | **impressão, divulgação, uso externo — padrão atual** |
+| H | ~30% | máxima | reservar para quando houver logo central |
+
+`Q` deixa o código mais denso que `M`, especialmente para URLs longas. Isso é
+aceitável para o público-alvo do projeto; a recomendação é preferir um
+caminho de URL curto em vez de adotar um encurtador externo, o que
+reintroduziria a dependência de plataforma que o projeto existe para evitar.
 
 Isso não significa que qualquer logotipo ou obstrução possa ser aplicado com
 segurança. Alterações visuais precisam ser testadas em diferentes leitores.
@@ -352,12 +386,26 @@ manter a identidade visual da página.
 
 ### PNG
 
-- resolução de 1024 × 1024 pixels;
-- nome: `qr-code-estatico-1024px.png`;
-- apropriado para telas, documentos e impressões comuns.
+- resolução de 2048 × 2048 pixels;
+- nome: `qr-code-estatico-2048px.png`;
+- apropriado para impressão profissional (cartaz, banner, fachada), além de
+  telas e documentos.
 
 O PNG é gerado em um canvas separado. Assim, o preview pode permanecer leve
-sem limitar a qualidade do arquivo baixado.
+sem limitar a qualidade do arquivo baixado. Por ser preto e branco, o PNG
+comprime bem — o peso do arquivo fica bem abaixo de 100 KB mesmo em alta
+resolução.
+
+Tabela de referência de tamanho impresso por resolução de tela:
+
+| Resolução | 300 DPI (impressão fina) | 150 DPI (formato grande) |
+|---|---|---|
+| 1024 px | ~8,6 cm | ~17 cm |
+| **2048 px** | **~17 cm** | **~34 cm** |
+
+Regra: `tamanho_cm = (pixels / DPI) * 2,54`. Para impressões ainda maiores, o
+SVG é o formato recomendado — ele amplia sem perda, enquanto o PNG 2048 é o
+meio-termo prático entre qualidade e peso de arquivo.
 
 ### SVG
 
@@ -421,9 +469,21 @@ contribuições sem ampliar silenciosamente o escopo estático do produto.
 `/.well-known/security.txt` publica contato, política, idiomas preferidos e
 prazo de validade conforme o formato da RFC 9116.
 
-As novas páginas não possuem scripts ou estilos inline. Elas estão preparadas
-para uma CSP restritiva futura, mas os headers da CSP pertencem à spec M3 e não
-foram adicionados por esta evolução.
+As novas páginas não possuem scripts ou estilos inline, o que permite uma CSP
+restritiva sem exceções. `netlify.toml` publica, para todas as rotas:
+
+- `Content-Security-Policy` restritiva (`default-src 'self'`, sem origens
+  externas — coerente com o fato de que toda a geração já é local);
+- `X-Content-Type-Options: nosniff`;
+- `Referrer-Policy: no-referrer`;
+- `X-Frame-Options: DENY`;
+- `Permissions-Policy` desativando geolocalização, microfone, câmera e
+  pagamentos;
+- `Strict-Transport-Security` com `includeSubDomains`.
+
+`vendor/` e `assets/` recebem `Cache-Control` de longa duração e imutável,
+já que esses arquivos só mudam quando o hash do vendor é atualizado ou os
+assets sociais são substituídos.
 
 ## Acessibilidade
 
@@ -548,11 +608,13 @@ O arquivo `test/url-utils.test.js` verifica:
 - HTTPS válido;
 - inclusão automática de HTTPS;
 - remoção de espaços;
-- localhost;
+- localhost, com e sem porta;
 - campo vazio;
 - texto inválido;
 - protocolos não permitidos;
-- hostname estruturalmente inválido.
+- hostname estruturalmente inválido;
+- hostname sem TLD plausível (rejeitado);
+- IPv4 e IPv6 literais (aceitos).
 
 ### Testes do projeto
 
@@ -561,16 +623,19 @@ O arquivo `test/project.test.js` verifica:
 - carregamento local da biblioteca;
 - ausência de referência ao jsDelivr;
 - margem de quatro módulos;
-- configuração do PNG em 1024 pixels;
+- correção de erro `Q`;
+- configuração do PNG em 2048 pixels;
 - geração de SVG;
 - geração real de um SVG válido pela biblioteca incorporada;
 - metadados sociais;
 - favicon e imagem social;
-- licenças do projeto e da dependência.
+- licenças do projeto e da dependência;
 - páginas educativa e de privacidade;
 - governança e templates de contribuição;
 - política de segurança e `security.txt`;
-- integração estrutural do botão de cópia.
+- integração estrutural do botão de cópia;
+- cabeçalhos de segurança restritivos em `netlify.toml`;
+- pipeline de build com testes, hash do vendor e publicação isolada em `dist/`.
 
 ### Testes de integridade
 
@@ -591,6 +656,33 @@ O arquivo `test/project.test.js` verifica:
 - botão oculto e desabilitado sem suporte;
 - botão visível em ambiente compatível;
 - erro de permissão tratado sem travar a interface.
+
+### Testes de comportamento da interface
+
+`test/scripts-behavior.test.js` usa `happy-dom` para montar um DOM real em
+memória e mocks do gerador `QRCode`, exercitando `createApp()` de ponta a
+ponta. Diferente dos smoke tests de `project.test.js` (que só conferem se uma
+configuração está escrita no arquivo), estes testes provam comportamento
+observável — falham se o fluxo quebrar, mesmo que a string de configuração
+continue correta. Cobertura:
+
+- submit com URL válida leva ao estado de sucesso e desenha no canvas;
+- submit com URL inválida mostra erro, mantém o resultado oculto e não trava
+  o botão de gerar;
+- a mensagem de erro fica associada ao campo por `aria-describedby`;
+- biblioteca de QR ausente mostra aviso de indisponibilidade sem travar a
+  interface;
+- erro síncrono da biblioteca é tratado e o botão volta ao estado normal;
+- o evento nativo de `submit` do formulário (disparado tanto pelo Enter
+  quanto pelo clique no botão) aciona o mesmo fluxo;
+- gerar um novo QR Code substitui o resultado anterior;
+- digitar após um resultado gerado limpa o resultado e a mensagem;
+- download do PNG e do SVG criam e revogam corretamente o `objectURL`
+  temporário (`URL.createObjectURL` / `URL.revokeObjectURL` espionados);
+- o PNG exportado usa 2048 pixels de largura.
+
+`happy-dom` é a única devDependency do projeto, registrada em
+`package.json`. Ela só existe em tempo de teste — não é publicada no site.
 
 ## Execução local
 
@@ -701,12 +793,14 @@ plataformas.
 
 - QR Codes estáticos não permitem trocar o destino depois da impressão.
 - A disponibilidade da página de destino não é monitorada.
-- URLs muito longas geram códigos mais densos.
+- URLs muito longas combinadas com o nível de correção `Q` geram códigos
+  visualmente densos; prefira caminhos curtos em vez de encurtadores
+  externos, que reintroduziriam a dependência que o projeto evita.
 - A aplicação não oferece personalização de cores ou logotipos.
 - Não existem estatísticas de leitura.
 - Não existe histórico de códigos gerados.
-- O nível de correção de erro é fixo em `M`.
-- O PNG possui resolução fixa de 1024 × 1024 pixels.
+- O nível de correção de erro é fixo em `Q` (sem seleção pelo usuário).
+- O PNG possui resolução fixa de 2048 × 2048 pixels (sem seleção pelo usuário).
 
 Essas limitações são compatíveis com o objetivo atual: resolver de forma
 transparente a geração de um QR Code estático.
@@ -745,11 +839,11 @@ Esses recursos exigiriam armazenamento e ampliariam o escopo. A proposta atual
 Sem comprometer a proposta principal, o projeto pode evoluir com:
 
 - testes automatizados em navegador;
-- seleção de resolução;
+- seleção de resolução do PNG pelo usuário;
+- seleção do nível de correção de erro pelo usuário;
 - modo de impressão;
 - download em PDF;
 - suporte opcional a texto, telefone, e-mail e Wi-Fi;
-- cabeçalhos de segurança no Netlify;
 - domínio próprio.
 
 Personalização visual, QR dinâmico, analytics e contas devem ser tratados como
@@ -763,19 +857,23 @@ estático, testado e documentado.
 
 A aplicação atual:
 
-- valida o endereço;
+- valida o endereço, exigindo um domínio publicamente plausível;
 - mostra exatamente o que será codificado;
-- gera o QR Code no navegador;
+- gera o QR Code no navegador com correção de erro `Q`, calibrada para
+  impressão e divulgação;
 - não utiliza redirecionamento intermediário;
 - não armazena dados;
-- entrega PNG em alta resolução e SVG;
+- entrega PNG em 2048 pixels e SVG;
 - copia o QR como imagem quando o navegador permite;
 - incorpora sua própria dependência;
 - verifica a integridade dessa dependência por SHA-256;
+- publica cabeçalhos de segurança restritivos (CSP, HSTS e afins) via
+  `netlify.toml`;
 - possui licenças, acessibilidade e metadados;
 - publica conteúdo educativo, privacidade e segurança;
 - possui regras e templates de contribuição;
-- é validada por uma suíte automatizada.
+- é validada por uma suíte automatizada que cobre tanto configuração quanto
+  comportamento real da interface.
 
 O princípio original foi preservado durante toda a evolução: depois que o QR
 Code é baixado ou impresso, seu funcionamento não depende da continuidade do
